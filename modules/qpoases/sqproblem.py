@@ -13,3 +13,6 @@ class SQProblem:
 
     def hotstart(self, H, g, A, lb, ub, lbA, ubA, nWSR):
         return self.__impl.hotstart(H, g, A, lb, ub, lbA, ubA, nWSR)
+
+    def get_primal_solution(self):
+        return self.__impl.getPrimalSolution()
