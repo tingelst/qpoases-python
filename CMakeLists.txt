@@ -27,7 +27,6 @@ add_library(_qpoases MODULE ${SOURCES})
 target_compile_definitions(_qpoases
                            PRIVATE
                            -D__NO_COPYRIGHT__
-                           -D__SUPPRESSANYOUTPUT__
                            )
 
 target_include_directories(_qpoases
