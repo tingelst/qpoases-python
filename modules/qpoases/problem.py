@@ -25,12 +25,12 @@ class QProblem(QProblemB):
         self._impl = _qpoases.QProblem(
             nv, nc, _qpoases.HessianType(hessian_type.value), _qpoases.BooleanType(allocate_dense_matrices))
 
-    def init(self, H, g, A, lb, ub, lbA, ubA, nwsr, cputime=None, xopt=None, yopt=None, guesses_bounds=None, guessed_constraints=None, R=None):
+    def init(self, H, g, A, lb, ub, lbA, ubA, nwsr, cputime=None, xopt=None, yopt=None, guessed_bounds=None, guessed_constraints=None, R=None):
         '''Initialises a QP problem with given QP data and tries to solve it using at most nWSR iterations.'''
-        return ReturnValue(self._impl.init(H, g, A, lb, ub, lbA, ubA, nwsr, cputime, xopt, yopt))
+        return ReturnValue(self._impl.init(H, g, A, lb, ub, lbA, ubA, nwsr, cputime, xopt, yopt, guessed_bounds, guessed_constraints, R))
 
-    def hotstart(self, g, lb, ub, lbA, ubA, nWSR):
-        return self._impl.hotstart(g, lb, ub, lbA, ubA, nWSR)
+    def hotstart(self, g, lb, ub, lbA, ubA, nWSR, cputime=None, guessed_bounds=None, guessed_constraints=None):
+        return self._impl.hotstart(g, lb, ub, lbA, ubA, nWSR, cputime, guessed_bounds, guessed_constraints)
 
 
 class SQProblem(QProblem):
@@ -38,8 +38,5 @@ class SQProblem(QProblem):
         self._impl = _qpoases.SQProblem(
             nv, nc, _qpoases.HessianType(hessian_type.value), _qpoases.BooleanType(allocate_dense_matrices))
 
-    def init(self, H, g, A, lb, ub, lbA, ubA, nWSR):
-        return self._impl.init(H, g, A, lb, ub, lbA, ubA, nWSR)
-
-    def hotstart(self, H, g, A, lb, ub, lbA, ubA, nWSR):
-        return self._impl.hotstart(H, g, A, lb, ub, lbA, ubA, nWSR)
+    def hotstart(self, H, g, A, lb, ub, lbA, ubA, nWSR, cputime=None, guessed_bounds=None, guessed_constraints=None):
+        return self._impl.hotstart(H, g, A, lb, ub, lbA, ubA, nWSR, cputime, guessed_bounds, guessed_constraints)
