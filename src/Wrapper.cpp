@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 namespace py = pybind11;
 
@@ -25,9 +26,42 @@ PYBIND11_MODULE(_qpoases, m)
     py::class_<Options>(m, "Options")
         .def(py::init<>());
 
+    py::enum_<HessianType>(m, "HessianType")
+        .value("ZERO", HST_ZERO)
+        .value("IDENTITY", HST_IDENTITY)
+        .value("POSDEF", HST_POSDEF)
+        .value("POSDEF_NULLSPACE", HST_POSDEF_NULLSPACE)
+        .value("SEMIDEF", HST_SEMIDEF)
+        .value("INDEF", HST_INDEF)
+        .value("UNKNOWN", HST_UNKNOWN)
+        .export_values();
+
+    py::enum_<BooleanType>(m, "BooleanType")
+        .value("TRUE", BT_TRUE)
+        .value("FALSE", BT_FALSE)
+        .export_values();
+
+    py::enum_<PrintLevel>(m, "PrintLevel")
+        .value("DEBUG_ITER", PL_DEBUG_ITER)
+        .value("TABULAR", PL_TABULAR)
+        .value("NONE", PL_NONE)
+        .value("LOW", PL_LOW)
+        .value("MEDIUM", PL_MEDIUM)
+        .value("HIGH", PL_HIGH)
+        .export_values();
+
+    py::enum_<QProblemStatus>(m, "QProblemStatus")
+        .value("NOT_INITIALISED", QPS_NOTINITIALISED)
+        .value("PREPARING_AUXILIARY_QP", QPS_PREPARINGAUXILIARYQP)
+        .value("AUXILIARY_QP_SOLVED", QPS_AUXILIARYQPSOLVED)
+        .value("PERFORMING_HOMOTOPY", QPS_PERFORMINGHOMOTOPY)
+        .value("HOMOTOPY_QP_SOLVED", QPS_HOMOTOPYQPSOLVED)
+        .value("SOLVED", QPS_SOLVED)
+        .export_values();
+
     py::class_<QProblemB>(m, "QProblemB")
         .def(py::init<>())
-        .def(py::init<int>())
+        .def(py::init<int, HessianType, BooleanType>(), py::arg("nV"), py::arg("hessian_type") = HST_UNKNOWN, py::arg("allocate_dense_matrices") = BT_TRUE)
         .def(py::init<const QProblemB &>())
         .def("reset", &QProblemB::reset)
         .def("init",
@@ -116,65 +150,36 @@ PYBIND11_MODULE(_qpoases, m)
         .def("printProperties", &QProblemB::printProperties)
         .def("printOptions", &QProblemB::printOptions);
 
-    py::enum_<HessianType>(m, "HessianType")
-        .value("ZERO", HST_ZERO)
-        .value("IDENTITY", HST_IDENTITY)
-        .value("POSDEF", HST_POSDEF)
-        .value("POSDEF_NULLSPACE", HST_POSDEF_NULLSPACE)
-        .value("SEMIDEF", HST_SEMIDEF)
-        .value("INDEF", HST_INDEF)
-        .value("UNKNOWN", HST_UNKNOWN)
-        .export_values();
-
-    py::enum_<BooleanType>(m, "BooleanType")
-        .value("TRUE", BT_TRUE)
-        .value("FALSE", BT_FALSE)
-        .export_values();
-
-    py::enum_<PrintLevel>(m, "PrintLevel")
-        .value("DEBUG_ITER", PL_DEBUG_ITER)
-        .value("TABULAR", PL_TABULAR)
-        .value("NONE", PL_NONE)
-        .value("LOW", PL_LOW)
-        .value("MEDIUM", PL_MEDIUM)
-        .value("HIGH", PL_HIGH)
-        .export_values();
-
-    py::enum_<QProblemStatus>(m, "QProblemStatus")
-        .value("QPS_NOTINITIALISED", QPS_NOTINITIALISED)
-        .value("QPS_PREPARINGAUXILIARYQP", QPS_PREPARINGAUXILIARYQP)
-        .value("QPS_AUXILIARYQPSOLVED", QPS_AUXILIARYQPSOLVED)
-        .value("QPS_PERFORMINGHOMOTOPY", QPS_PERFORMINGHOMOTOPY)
-        .value("QPS_HOMOTOPYQPSOLVED", QPS_HOMOTOPYQPSOLVED)
-        .value("QPS_SOLVED", QPS_SOLVED)
-        .export_values();
-
     py::class_<QProblem, QProblemB>(m, "QProblem")
         .def(py::init<int, int, HessianType, BooleanType>(), py::arg("nV"), py::arg("nC"), py::arg("hessian_type") = HST_UNKNOWN, py::arg("alloc_dense_mats") = BT_TRUE)
-        .def("init",
-             [](QProblem &problem, NumpyArray H, NumpyArray g, NumpyArray A, NumpyArray lb, NumpyArray ub, NumpyArray lbA, NumpyArray ubA, int nWSR) {
-                 auto H_ptr = static_cast<double *>(H.request().ptr);
-                 auto g_ptr = static_cast<double *>(g.request().ptr);
-                 auto A_ptr = static_cast<double *>(A.request().ptr);
-                 auto lb_ptr = static_cast<double *>(lb.request().ptr);
-                 auto ub_ptr = static_cast<double *>(ub.request().ptr);
-                 auto lbA_ptr = static_cast<double *>(lbA.request().ptr);
-                 auto ubA_ptr = static_cast<double *>(ubA.request().ptr);
+        .def(
+            "init",
+            [](QProblem &problem, NumpyArray H, NumpyArray g, NumpyArray A, NumpyArray lb,
+               NumpyArray ub, NumpyArray lbA, NumpyArray ubA, int nWSR, std::optional<double *const> cputime,
+               std::optional<NumpyArray> xopt, std::optional<NumpyArray> yopt) {
+                auto H_ptr = static_cast<double *>(H.request().ptr);
+                auto g_ptr = static_cast<double *>(g.request().ptr);
+                auto A_ptr = static_cast<double *>(A.request().ptr);
+                auto lb_ptr = static_cast<double *>(lb.request().ptr);
+                auto ub_ptr = static_cast<double *>(ub.request().ptr);
+                auto lbA_ptr = static_cast<double *>(lbA.request().ptr);
+                auto ubA_ptr = static_cast<double *>(ubA.request().ptr);
 
-                 return problem.init(H_ptr, g_ptr, A_ptr, lb_ptr, ub_ptr, lbA_ptr, ubA_ptr, nWSR);
-             })
-        .def("init",
-             [](QProblem &problem, NumpyArray H, NumpyArray g, NumpyArray A, NumpyArray lb, NumpyArray ub, NumpyArray lbA, NumpyArray ubA, int nWSR) {
-                 auto H_ptr = static_cast<double *>(H.request().ptr);
-                 auto g_ptr = static_cast<double *>(g.request().ptr);
-                 auto A_ptr = static_cast<double *>(A.request().ptr);
-                 auto lb_ptr = static_cast<double *>(lb.request().ptr);
-                 auto ub_ptr = static_cast<double *>(ub.request().ptr);
-                 auto lbA_ptr = static_cast<double *>(lbA.request().ptr);
-                 auto ubA_ptr = static_cast<double *>(ubA.request().ptr);
+                double *xopt_ptr = nullptr;
+                if (xopt)
+                {
+                    xopt_ptr = static_cast<double *>(xopt.value().request().ptr);
+                }
+                double *yopt_ptr = nullptr;
+                if (yopt)
+                {
+                    yopt_ptr = static_cast<double *>(yopt.value().request().ptr);
+                }
 
-                 return problem.init(H_ptr, g_ptr, A_ptr, lb_ptr, ub_ptr, lbA_ptr, ubA_ptr, nWSR);
-             })
+                return problem.init(H_ptr, g_ptr, A_ptr, lb_ptr, ub_ptr, lbA_ptr, ubA_ptr, nWSR, cputime.value_or(nullptr), xopt_ptr, yopt_ptr);
+            },
+            py::arg("H"), py::arg("g"), py::arg("A"), py::arg("lb"), py::arg("ub"), py::arg("lbA"), py::arg("ubA"), py::arg("nWSR"),
+            py::arg("cputime"), py::arg("xopt"), py::arg("yopt"))
         .def("hotstart",
              [](QProblem &problem, NumpyArray g, NumpyArray lb, NumpyArray ub, NumpyArray lbA, NumpyArray ubA, int nWSR) {
                  auto g_ptr = static_cast<double *>(g.request().ptr);
@@ -187,7 +192,7 @@ PYBIND11_MODULE(_qpoases, m)
 
     py::class_<SQProblem, QProblem>(m, "SQProblem")
         .def(py::init<>())
-        .def(py::init<int, int, HessianType, BooleanType>(), py::arg("nV"), py::arg("nC"), py::arg("_hessianType") = HST_UNKNOWN, py::arg("allocDenseMats") = BT_TRUE)
+        .def(py::init<int, int, HessianType, BooleanType>(), py::arg("nV"), py::arg("nC"), py::arg("hessian_type") = HST_UNKNOWN, py::arg("alloc_dense_mats") = BT_TRUE)
         .def("init",
              [](SQProblem &problem, NumpyArray H, NumpyArray g, NumpyArray A, NumpyArray lb, NumpyArray ub, NumpyArray lbA, NumpyArray ubA, int nWSR) {
                  auto H_ptr = static_cast<double *>(H.request().ptr);

@@ -1,3 +1,4 @@
 
-from _qpoases import HessianType
-from qpoases.sqproblem import SQProblem
+from qpoases.problem import QProblemB
+from qpoases.problem import QProblem
+from qpoases.problem import SQProblem
