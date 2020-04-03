@@ -139,6 +139,16 @@ PYBIND11_MODULE(_qpoases, m)
              problem.getWorkingSetConstraints(result_ptr);
              return result;
            })
+      .def("getBounds",
+           [](QProblemB& problem) {
+             Bounds bounds;
+             auto ret = problem.getBounds(bounds);
+             return std::make_tuple(ret, bounds);
+           })
+      .def("getNV", &QProblemB::getNV)
+      .def("getNFR", &QProblemB::getNFR)
+      .def("getNFX", &QProblemB::getNFX)
+      .def("getNFV", &QProblemB::getNFV)
       .def("getNZ", &QProblemB::getNZ)
       .def("getObjVal", [](QProblemB& problem) { return problem.getObjVal(); })
       .def("getObjVal",
@@ -300,7 +310,7 @@ PYBIND11_MODULE(_qpoases, m)
 
   py::class_<SQProblem, QProblem>(m, "SQProblem")
       .def(py::init<>())
-      .def(py::init<int, int, HessianType, BooleanType>(), py::arg("nV"), py::arg("nC"),
+      .def(py::init<int, int, HessianType, BooleanType>(), py::arg("nv"), py::arg("nc"),
            py::arg("hessian_type") = HST_UNKNOWN, py::arg("allocate_dense_matrices") = BT_TRUE)
       .def("reset", &SQProblem::reset)
       .def(
@@ -338,5 +348,8 @@ PYBIND11_MODULE(_qpoases, m)
           },
           py::arg("allow_inertia_correction"));
 
-  py::enum_<returnValue>(m, "ReturnValue").value("SUCCESSFUL_RETURN", returnValue::SUCCESSFUL_RETURN).export_values();
+  py::enum_<returnValue>(m, "ReturnValue")
+      .value("SUCCESSFUL_RETURN", returnValue::SUCCESSFUL_RETURN)
+
+      .export_values();
 }

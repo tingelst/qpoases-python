@@ -11,7 +11,17 @@ class QProblemB:
         '''Clears all data structures except for QP data.'''
         return ReturnValue(self._impl.reset())
 
-    # def init(self, H, g, lb, ub, nWSR)
+    def init(self, H, g, lb, ub, nwsr, cputime=None, xopt=None, yopt=None, guessed_bounds=None, R=None):
+        '''Initialises a QP problem with given QP data and tries to solve it using at most nWSR iterations.'''
+        return ReturnValue(self._impl.init(H, g, lb, ub, nwsr, cputime, xopt, yopt, guessed_bounds, R))
+
+    def hotstart(self, g, lb, ub, nwsr, cputime=None, guessed_bounds=None):
+		'''Solves an initialised QP sequence using the online active set strategy.'''
+        return ReturnValue(self._impl.hotstart(g, lb, ub, nwsr, cputime, guessed_bounds))
+
+    @property
+    def nv(self):
+        return self._impl.getNV()
 
     def get_primal_solution(self):
         return self._impl.getPrimalSolution()

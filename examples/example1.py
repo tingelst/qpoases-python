@@ -4,6 +4,7 @@ import _qpoases
 # from _qpoases import SQProblem
 from qpoases import SQProblem
 from qpoases.bounds import Bounds
+from qpoases.constraints import Constraints
 from qpoases.types import HessianType
 
 H = np.array([1.0, 0.0, 0.0, 0.5]).reshape((2, 2))
@@ -14,20 +15,17 @@ ub = np.array([5.0, 2.0])
 lbA = np.array([-1.0])
 ubA = np.array([2.0])
 
-example = SQProblem(2, 1, HessianType.UNKNOWN, True)
+example = SQProblem(2, 1)
 print(example.get_primal_solution())
-ret = example.init(H, g, A, lb, ub, lbA, ubA, 10)
+ret = example.init(H, g, A, lb, ub, lbA, ubA, 10,)
 print(example.get_primal_solution())
 
-g_new   = np.array([1.0, 1.5])
-lb_new  = np.array([0.0, -1.0])
-ub_new  = np.array([5.0, -0.5])
+g_new = np.array([1.0, 1.5])
+lb_new = np.array([0.0, -1.0])
+ub_new = np.array([5.0, -0.5])
 lbA_new = np.array([-2.0])
 ubA_new = np.array([1.0])
 
 ret = example.hotstart(H, g_new, A, lb_new, ub_new, lbA_new, ubA_new, 10)
 print(example.get_primal_solution())
-
-
-
 
