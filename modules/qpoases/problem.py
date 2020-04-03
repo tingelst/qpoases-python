@@ -40,13 +40,16 @@ class QProblem(QProblemB):
         return ReturnValue(self._impl.init(H, g, A, lb, ub, lbA, ubA, nwsr, cputime, xopt, yopt, guessed_bounds, guessed_constraints, R))
 
     def hotstart(self, g, lb, ub, lbA, ubA, nWSR, cputime=None, guessed_bounds=None, guessed_constraints=None):
+		'''Solves an initialised QP sequence using the online active set strategy.'''
         return self._impl.hotstart(g, lb, ub, lbA, ubA, nWSR, cputime, guessed_bounds, guessed_constraints)
 
 
 class SQProblem(QProblem):
     def __init__(self, nv, nc, hessian_type=HessianType.UNKNOWN, allocate_dense_matrices=True):
+        '''Initialises a QP problem with given QP data and tries to solve it using at most nWSR iterations.'''
         self._impl = _qpoases.SQProblem(
             nv, nc, _qpoases.HessianType(hessian_type.value), _qpoases.BooleanType(allocate_dense_matrices))
 
     def hotstart(self, H, g, A, lb, ub, lbA, ubA, nWSR, cputime=None, guessed_bounds=None, guessed_constraints=None):
+		'''Solves an initialised QP sequence using the online active set strategy.'''
         return self._impl.hotstart(H, g, A, lb, ub, lbA, ubA, nWSR, cputime, guessed_bounds, guessed_constraints)
