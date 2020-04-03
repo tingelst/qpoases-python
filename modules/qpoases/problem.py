@@ -16,8 +16,11 @@ class QProblemB:
         return ReturnValue(self._impl.init(H, g, lb, ub, nwsr, cputime, xopt, yopt, guessed_bounds, R))
 
     def hotstart(self, g, lb, ub, nwsr, cputime=None, guessed_bounds=None):
-		'''Solves an initialised QP sequence using the online active set strategy.'''
         return ReturnValue(self._impl.hotstart(g, lb, ub, nwsr, cputime, guessed_bounds))
+
+    def get_working_set(self):
+        ret, working_set = self._impl.getWorkingSet()
+        return ReturnValue(ret), working_set
 
     @property
     def nv(self):
@@ -40,7 +43,6 @@ class QProblem(QProblemB):
         return ReturnValue(self._impl.init(H, g, A, lb, ub, lbA, ubA, nwsr, cputime, xopt, yopt, guessed_bounds, guessed_constraints, R))
 
     def hotstart(self, g, lb, ub, lbA, ubA, nWSR, cputime=None, guessed_bounds=None, guessed_constraints=None):
-		'''Solves an initialised QP sequence using the online active set strategy.'''
         return self._impl.hotstart(g, lb, ub, lbA, ubA, nWSR, cputime, guessed_bounds, guessed_constraints)
 
 
@@ -51,5 +53,4 @@ class SQProblem(QProblem):
             nv, nc, _qpoases.HessianType(hessian_type.value), _qpoases.BooleanType(allocate_dense_matrices))
 
     def hotstart(self, H, g, A, lb, ub, lbA, ubA, nWSR, cputime=None, guessed_bounds=None, guessed_constraints=None):
-		'''Solves an initialised QP sequence using the online active set strategy.'''
         return self._impl.hotstart(H, g, A, lb, ub, lbA, ubA, nWSR, cputime, guessed_bounds, guessed_constraints)
