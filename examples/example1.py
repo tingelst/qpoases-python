@@ -16,7 +16,7 @@ ubA = np.array([2.0])
 
 example = SQProblem(2, 1, HessianType.UNKNOWN, True)
 print(example.get_primal_solution())
-ret = example.init(H, g, A, lb, ub, lbA, ubA, 10, guessed_bounds=Bounds())
+ret = example.init(H, g, A, lb, ub, lbA, ubA, 10)
 print(example.get_primal_solution())
 
 g_new   = np.array([1.0, 1.5])
@@ -25,7 +25,7 @@ ub_new  = np.array([5.0, -0.5])
 lbA_new = np.array([-2.0])
 ubA_new = np.array([1.0])
 
-ret = example.hotstart(H, g_new, A, lb_new, ub_new, lbA_new, ubA_new, 10, guessed_bounds=)
+ret = example.hotstart(H, g_new, A, lb_new, ub_new, lbA_new, ubA_new, 10)
 print(example.get_primal_solution())
 
 
